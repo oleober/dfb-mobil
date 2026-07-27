@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
 *{-webkit-tap-highlight-color:transparent;}
-body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;background:#fff;color:var(--tiefgruen);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400;background:#fff;color:var(--tiefgruen);display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
 
 /* ---------- Top bar ---------- */
 .topbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 22px;height:52px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08);flex:0 0 auto;z-index:10;}
@@ -179,6 +179,10 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 #dl .dl-icon{display:none;}
 /* ================= MOBIL (Handy Hochformat) ================= */
 @media (max-width:640px){
+ /* App fest im sichtbaren Viewport verankern: iOS-Safari scrollt sonst beim Fokussieren
+    das ganze Fenster weg und bleibt hängen. Nur die .stage-area scrollt intern. */
+ html,body{overflow:hidden;overscroll-behavior:none;}
+ body{position:fixed;top:0;left:0;width:100%;height:100dvh;}
  .topbar{flex-wrap:nowrap;height:52px;min-height:0;padding:6px 12px;column-gap:10px;}
  .topbar .title,.topbar-tabs{display:none;}
  .mnav-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:none;background:transparent;border-radius:10px;cursor:pointer;color:var(--web-black);padding:0;margin-left:-6px;flex:0 0 auto;}
