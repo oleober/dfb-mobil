@@ -35,7 +35,7 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 .dfb-Button:active{background:var(--akzentviolett-active);transform:translateY(2px);}
 .dfb-Button:focus-visible{box-shadow:0 0 0 3px #fff,0 0 0 6px #1e9be0;}
 .dfb-Button:disabled,.dfb-Button[disabled]{background:var(--akzentviolett-soft);color:#fff;cursor:not-allowed;transform:none;box-shadow:none;}
-.dfb-Button-label{display:inline-block;line-height:1;}
+.dfb-Button-label{display:inline-block;line-height:1;transform:translateY(var(--capn,0));}
 .dfb-Button-icon{display:inline-flex;align-items:center;}
 .dfb-Symbol{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .dfb-Button--icon{padding:0;width:56px;height:56px;border-radius:50%;gap:0;}
@@ -714,8 +714,12 @@ function fitMhead(){const m=$('mheadTitle');m.style.fontSize='';capMid(m);
 const CAP_DESC=/[gjpqy]/;
 function capMid(el,txt){if(!el)return;const t=(txt!=null?txt:el.textContent)||'';el.style.setProperty('--capn',CAP_DESC.test(t)?'0px':'.045em');}
 docTabs.forEach(t=>t.addEventListener('click',e=>{e.preventDefault();selectDoc(t.dataset.doc);}));
-/* Desktop: Tab-Labels und Titel einmalig zentrieren */
-document.querySelectorAll('#docTabs .dfb-Tabs-tabLabel').forEach(l=>{const d=l.querySelector('.lbl-d');capMid(l,d?d.textContent:l.textContent);});
+/* Desktop-Topbar: Tabs, Titel und Export-Button strikt auf Cap-Höhe (H-Linie) mittig,
+   unabhängig von Unterlängen (g,j,p,y). Kalibrierter Cap-Zentrier-Versatz = 0.15em. */
+const TAB_CAPMID='0.15em';   /* Tabs: kalibrierter Cap-Zentrier-Versatz */
+const BTN_CAPMID='0.05em';   /* Button: eigener Wert (andere Flex-Struktur) */
+document.querySelectorAll('#docTabs .dfb-Tabs-tabLabel').forEach(l=>l.style.setProperty('--capn',TAB_CAPMID));
+{const dlLabel=document.querySelector('#dl .dfb-Button-label');if(dlLabel)dlLabel.style.setProperty('--capn',BTN_CAPMID);}
 capMid(document.querySelector('.topbar .title'));
 
 /* Mobiles Menü (Hamburger oben links) */
