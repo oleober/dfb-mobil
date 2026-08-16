@@ -123,6 +123,7 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 /* Export: alle Bedien-Elemente ausblenden */
 #stage.exporting .pnav,#stage.exporting .pupload,#stage.exporting .pdots,#stage.exporting .caret{display:none!important;}
 #stage.exporting .edit,#stage.exporting .pick{background:transparent!important;box-shadow:none!important;}
+#stage.exporting .pill.pick{background:var(--pill-bg)!important;}
 #stage.exporting [contenteditable]:empty:before,#stage.exporting #v-datum1:empty:before,#stage.exporting #v-datum2:empty:before,#stage.exporting #modultext:empty:before{content:""!important;}
 
 /* Dropdown-Menü (außerhalb der Grafik) */
@@ -316,17 +317,21 @@ let curDoc='grafik';
 const DOCS={
  grafik:{mlabel:'Ankündigungsgrafik',hlabel:'Grafik',w:1080,h:1920,scaler:'scaler',ratio:1,bgFn:()=>THEME_BG[stage.dataset.theme],
    sw:[{v:'light',l:'Hell'},{v:'dark',l:'Dunkel'}],swActive:()=>stage.dataset.theme,
-   fname:()=>docDate()+'_DFB-Mobil'},
+   fname:()=>buildFname('v-verein',stage.dataset.theme==='dark'?'dunkel':'hell')},
  poster:{mlabel:'Poster',hlabel:'Poster',w:1192,h:1686,scaler:'scaler-poster',ratio:2,bgFn:()=>'#ffffff',sw:null,pdf:true,wpt:2384,hpt:3370,
-   fname:()=>docDate()+'_DFB-Mobil_Poster'},
+   fname:()=>buildFname('p-host','Poster')},
  urkunde:{mlabel:'Urkunde',hlabel:'Urkunde',w:1240,h:1754,scaler:'scaler-urkunde',ratio:2,bgFn:()=>'#ffffff',pdf:true,wpt:595.5,hpt:842,
    sw:[{v:'verein',l:'Verein'},{v:'schule',l:'Schule'}],swActive:()=>$('ustage').dataset.variant,
-   fname:()=>docDate()+'_DFB-Mobil_Urkunde'}
+   fname:()=>buildFname('u-name','Urkunde')}
 };
 const DOCS_ORDER=['grafik','poster','urkunde'];
 /* Export-Dateiname: Datum (TT.MM.JJJJ) aus dem Dokument, sonst heute */
 function ddmmyyyy(d){const p=n=>String(n).padStart(2,'0');return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear();}
 function docDate(){const el=curDoc==='grafik'?$('v-datum1'):curDoc==='poster'?$('p-am'):$('u-date');const d=el&&el._date;return ddmmyyyy(d instanceof Date?d:new Date());}
+ function ddmmyy(d){const p=n=>String(n).padStart(2,'0');return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+p(d.getFullYear()%100);}
+ function fnDate(){const el=curDoc==='grafik'?$('v-datum1'):curDoc==='poster'?$('p-am'):$('u-date');const d=el&&el._date;return ddmmyy(d instanceof Date?d:new Date());}
+ function fnName(id){const el=$(id);let s=el?(el.textContent||''):'';s=s.replace(/[\\/:*?"<>|\n\r\t]+/g,' ').replace(/\s+/g,' ').trim();return s;}
+ function buildFname(nameId,tail){const nm=fnName(nameId);return fnDate()+(nm?'_'+nm:'')+'_DFB-Mobil_'+tail;}
 function activeStage(){return curDoc==='poster'?$('pstage'):curDoc==='urkunde'?$('ustage'):$('stage');}
 function fldSetText(el,txt){const d=el.querySelector('.disp');if(d){d.textContent=txt;d.classList.toggle('ph',!txt);}else{el.textContent=txt;}}
 function fitBox(el,base,min){el.style.fontSize=base+'px';let fs=base;while(el.scrollWidth>el.clientWidth+0.5&&fs>min){fs--;el.style.fontSize=fs+'px';}}
@@ -466,7 +471,11 @@ window.addEventListener('scroll',closeMenu,true);
 
 /* Pill + Modul */
 $('pill').addEventListener('click',()=>showMenu($('pill'),TOPLINE,$('pillspan').textContent,v=>{$('pillspan').textContent=v;},'Besuch'));
-$('v-modul').addEventListener('click',()=>showMenu($('v-modul'),MODULE,$('modultext').textContent,v=>{$('modultext').textContent=v;fitModul();},'Thema'));
+/* Pill je nach gewähltem Modul: Trainingsphilosophie-Module -> "Trainerfortbildung",
+   Walking Football / Schule des Kleinfeldfußballs -> "Fortbildung",
+   Schnuppertraining -> Pill unverändert lassen. */
+function syncPillToModul(v){if(/Trainingsphilosophie/.test(v)){$('pillspan').textContent=TOPLINE[0];}else if(v==='Walking Football'||v==='Schule des Kleinfeldfußballs'){$('pillspan').textContent=TOPLINE[1];}}
+$('v-modul').addEventListener('click',()=>showMenu($('v-modul'),MODULE,$('modultext').textContent,v=>{$('modultext').textContent=v;fitModul();syncPillToModul(v);},'Thema'));
 
 /* Datum: eigener Kalender, positioniert links oben vom Datum */
 function fmtDateObj(d){const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0');return `${WD[d.getDay()]}, ${dd}.${mm}.${d.getFullYear()}`;}
