@@ -681,11 +681,23 @@ async function download(){const b=$('dl');b.disabled=true;closeMenu();closeCal()
    const W=Math.round(cfg.w*cfg.ratio),H=Math.round(cfg.h*cfg.ratio);
    const cv=document.createElement('canvas');cv.width=W;cv.height=H;const cx=cv.getContext('2d');
    const slot=st.querySelector('.photo-slot'),pimg=$('photo');
-   const pv=pimg.style.visibility;pimg.style.visibility='hidden';
-   const base=await htmlToImage.toPng(st,{pixelRatio:cfg.ratio,width:cfg.w,height:cfg.h,backgroundColor:cfg.bgFn(),style:{transform:'none'}});
-   pimg.style.visibility=pv;
-   const bimg=await loadImg(base);cx.drawImage(bimg,0,0,W,H);
    const sr=st.getBoundingClientRect(),pr=slot.getBoundingClientRect();
+   // 1) Hintergrundfarbe deckend füllen
+   cx.fillStyle=cfg.bgFn();cx.fillRect(0,0,W,H);
+   // 2) Superzeichen selbst zeichnen: das große <img> (dunkel = WebP ~310KB) wird von
+   //    html-to-image auf manchen Geräten verschluckt und fehlte deshalb im Export.
+   const wm=[...st.querySelectorAll('.wm')].find(w=>getComputedStyle(w).display!=='none');
+   if(wm){try{const wimg=(wm.complete&&wm.naturalWidth)?wm:await loadImg(wm.currentSrc||wm.src);
+     const wr=wm.getBoundingClientRect();
+     const wx=(wr.left-sr.left)/sr.width*W,wy=(wr.top-sr.top)/sr.height*H,ww=wr.width/sr.width*W,wh=wr.height/sr.height*H;
+     cx.save();cx.globalAlpha=parseFloat(getComputedStyle(wm).opacity)||1;cx.drawImage(wimg,wx,wy,ww,wh);cx.restore();}catch(e){}}
+   // 3) Inhalt ohne Superzeichen/Foto auf transparentem Grund rendern und darüber legen
+   const pv=pimg.style.visibility;pimg.style.visibility='hidden';
+   const wmv=wm?wm.style.visibility:'';if(wm)wm.style.visibility='hidden';
+   const stBg=st.style.background;st.style.background='transparent';
+   const base=await htmlToImage.toPng(st,{pixelRatio:cfg.ratio,width:cfg.w,height:cfg.h,backgroundColor:'transparent',style:{transform:'none'}});
+   st.style.background=stBg;if(wm)wm.style.visibility=wmv;pimg.style.visibility=pv;
+   const bimg=await loadImg(base);cx.drawImage(bimg,0,0,W,H);
    const ex=(pr.left-sr.left)/sr.width*W,ey=(pr.top-sr.top)/sr.height*H,ew=pr.width/sr.width*W,eh=pr.height/sr.height*H;
    const img=(pimg.complete&&pimg.naturalWidth)?pimg:await loadImg(pimg.src);
    cx.save();roundRectPath(cx,ex,ey,ew,eh,24*cfg.ratio);cx.clip();
