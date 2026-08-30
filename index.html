@@ -26,7 +26,7 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 /* Hell/Dunkel als Chips (Avatar = Theme-Farbe) */
 /* Theme-Auswahl: durchgehende dünne graue Linie, aktiver Punkt mit dickem violettem Balken */
 .themenav{position:absolute;z-index:5;display:flex;flex-direction:column;gap:14px;padding-left:22px;}
-.themenav::before{content:"";position:absolute;left:11px;top:2px;bottom:2px;width:1px;background:var(--g3);}
+.themenav::before{content:"";position:absolute;left:11px;top:2px;bottom:2px;width:1px;background:var(--g3);transform:translateX(-50%);}
 .tnav{position:relative;display:block;text-align:left;border:none;background:transparent;padding:4px 0;font-family:inherit;font-size:var(--ui-sm);font-weight:400;font-stretch:100%;color:var(--web-black);cursor:pointer;line-height:1.25;transition:color .15s;transform:translateY(var(--capn,0));}
 .tnav.active::before{content:"";position:absolute;left:-11px;top:50%;transform:translate(-50%,-50%) translateY(calc(-1 * var(--capn,0px) - 0.4px));width:3px;height:24px;background:var(--akzentviolett);box-shadow:0 0 0 0.75px #fff;}
 /* ===== DFB-Button-Komponente (offizielles Markup) ===== */
