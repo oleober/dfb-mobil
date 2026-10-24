@@ -226,6 +226,9 @@ body.ready #boot{opacity:0;visibility:hidden;}
     das ganze Fenster weg und bleibt hängen. Nur die .stage-area scrollt intern. */
  html,body{overflow:hidden;overscroll-behavior:none;}
  body{position:fixed;top:0;left:0;width:100%;height:100dvh;}
+ /* Grafik bis ganz nach unten hinter die (schwebende) Browser-Leiste ziehen, statt dort eine
+    weiße Fläche zu lassen. lvh = volle Fensterhöhe inkl. Bereich hinter der Leiste. */
+ @supports (height:100lvh){body{height:100lvh;}}
  .topbar{flex-wrap:nowrap;height:52px;min-height:0;padding:6px 12px;column-gap:10px;}
  .topbar .title,.topbar-tabs{display:none;}
  .mnav-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:none;background:transparent;border-radius:10px;cursor:pointer;color:var(--web-black);padding:0;margin-left:-6px;flex:0 0 auto;}
@@ -246,7 +249,7 @@ body.ready #boot{opacity:0;visibility:hidden;}
  .mnav-sw{position:relative;display:block;text-align:left;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:400;font-stretch:100%;color:var(--web-black);cursor:pointer;line-height:1;padding:0;transform:translateY(var(--capn,0));}
  .mnav-sw.active.cur::before{content:'';position:absolute;left:-12px;top:50%;transform:translate(-50%,-50%) translateY(calc(-1 * var(--capn,0px) - 0.4px));width:3px;height:24px;background:var(--akzentviolett);box-shadow:0 0 0 0.75px #fff;}
  .lbl-d{display:none;} .lbl-m{display:inline;}
- .stage-area{flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding:12px 8px 48px;gap:12px;-webkit-overflow-scrolling:touch;}
+ .stage-area{flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding:12px 8px 48px;padding-bottom:calc(48px + 100lvh - 100dvh + env(safe-area-inset-bottom,0px));gap:12px;-webkit-overflow-scrolling:touch;}
  .stage-area .scaler{flex:0 0 auto;}
  .themenav{display:none;}
  .cal{width:min(340px,92vw);}
@@ -693,10 +696,17 @@ function rescale(){const area=document.querySelector('.stage-area');const cfg=DO
   sc.style.transform='none';sc.style.width=Math.round(cfg.w*s)+'px';sc.style.height=Math.round(cfg.h*s)+'px';sc.style.overflow='hidden';
   st.style.transformOrigin='top left';st.style.transform='scale('+s+')';
   nav.style.left='';nav.style.top='';
+  // Grafik mittig zur gesamten Fensterhöhe (inkl. Kopfleiste); passt sie nicht, oben unter der Kopfleiste
+  const winH=document.body.getBoundingClientRect().height||innerHeight,ar=area.getBoundingClientRect(),gh=cfg.h*s;
+  const padTop=parseFloat(getComputedStyle(area).paddingTop)||0;
+  sc.style.marginTop=Math.max(0,Math.round((winH-gh)/2-ar.top-padTop))+'px';
  } else {
   const m=16;const s=Math.min((area.clientHeight-m)/cfg.h,(area.clientWidth-m)/cfg.w);
-  sc.style.width='';sc.style.height='';sc.style.overflow='';st.style.transform='';st.style.transformOrigin='';
-  sc.style.transform='scale('+s+')';
+  sc.style.width='';sc.style.height='';sc.style.overflow='';st.style.transform='';st.style.transformOrigin='';sc.style.marginTop='';
+  // Mittig zur gesamten Fensterhöhe, soweit die Kopfleiste nicht im Weg ist (sonst wie bisher mittig darunter)
+  const ar=area.getBoundingClientRect(),gh=cfg.h*s,cur=ar.top+(ar.height-gh)/2,tgt=Math.max(ar.top+m/2,(innerHeight-gh)/2);
+  const dy=Math.round(tgt-cur);
+  sc.style.transform=(dy?'translateY('+dy+'px) ':'')+'scale('+s+')';
   if(nav.style.display!=='none'){const g=sc.getBoundingClientRect(),a=area.getBoundingClientRect();
    nav.style.left=Math.round(g.right-a.left+22)+'px';nav.style.top=Math.round(g.top-a.top+90)+'px';}
  }}
