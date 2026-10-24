@@ -62,7 +62,7 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 body.ready .stage-area>*{opacity:1;transition:opacity .35s ease;}
 @media (prefers-reduced-motion:reduce){body.ready .stage-area>*{transition:none;}}
 /* Lade-Überbrückung: Mittellinie + Mittelkreis in Hellgrau, etwas dunkleres Grau läuft um den Kreis */
-#boot{position:fixed;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;background:#fff;pointer-events:none;transition:opacity .35s ease,visibility 0s linear .35s;}
+#boot{position:fixed;left:0;right:0;top:52px;bottom:0;z-index:4;display:flex;align-items:center;justify-content:center;background:#fff;pointer-events:none;transition:opacity .35s ease,visibility 0s linear .35s;}
 body.ready #boot{opacity:0;visibility:hidden;}
 #boot svg{width:200px;height:64px;overflow:visible;}
 #boot .bl{stroke:var(--g2);stroke-width:2;}
