@@ -56,6 +56,11 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 .dfb-Tabs-labelContainer{display:flex;align-items:center;gap:8px;}
 
 .stage-area{position:relative;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:14px;background:#fff;}
+/* Sanfter Seitenaufbau: Arbeitsfläche bleibt unsichtbar, bis Schrift geladen und die
+   Grafik auf Bildschirmgröße skaliert ist (sonst kurz 1080 px groß sichtbar = "Zoom"). */
+.stage-area>*{opacity:0;}
+body.ready .stage-area>*{opacity:1;transition:opacity .35s ease;}
+@media (prefers-reduced-motion:reduce){body.ready .stage-area>*{transition:none;}}
 #docPlaceholder{display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;}
 #docPlaceholder .ph-title{font-size:18px;font-weight:600;font-stretch:100%;color:var(--dunkelgruen);}
 #docPlaceholder .ph-sub{font-size:var(--ui-xs);color:var(--g5);}
@@ -251,7 +256,7 @@ body{font-family:"DFB Sans Pro",-apple-system,BlinkMacSystemFont,sans-serif;font
 <div class="topbar">
   <button class="mnav-btn" id="mnavBtn" type="button" aria-label="Menü"><svg class="dfb-Ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="2"/><rect x="1" y="11" width="22" height="2"/><rect x="1" y="18" width="16" height="2"/></svg></button>
   <div class="mnav" id="mnav"></div>
-  <div class="mhead" id="mheadTitle"></div>
+  <div class="mhead" id="mheadTitle">Grafik Story</div>
   <div class="title">DFB-Mobil</div>
   <div class="dfb-Tabs dfb-Tabs--simple topbar-tabs" id="docTabs">
     <div class="dfb-Tabs-scroller"><div class="dfb-Tabs-scrollArea"><div class="dfb-Tabs-scrollContent">
@@ -829,6 +834,10 @@ document.addEventListener('click',e=>{if(mnav.classList.contains('open')&&!mnav.
 
 $('mheadTitle').textContent=DOCS[curDoc].hlabel;fitMhead();
 buildSwitch();setUrkVariant('verein');
-document.fonts.ready.then(()=>{fitAll();fitHost();fitUname();fitUdate();rescale();});
+rescale();
+let _ready=false;
+function markReady(){if(_ready)return;_ready=true;rescale();requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));}
+setTimeout(markReady,3000); /* Sicherheitsnetz, falls fonts.ready hängt */
+document.fonts.ready.then(()=>{fitAll();fitHost();fitUname();fitUdate();rescale();markReady();});
 window.addEventListener('load',()=>{rescale();setTimeout(()=>{fitAll();fitHost();fitUname();fitUdate();},120);});
 </script></body></html>
