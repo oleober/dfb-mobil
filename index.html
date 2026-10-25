@@ -221,13 +221,12 @@ body.ready #boot{opacity:0;visibility:hidden;}
 #dl .dl-icon{display:none;}
 /* ================= MOBIL (Handy Hochformat) ================= */
 @media (max-width:640px){
- /* App fest im sichtbaren Viewport verankern: iOS-Safari scrollt sonst beim Fokussieren
-    das ganze Fenster weg und bleibt hängen. Nur die .stage-area scrollt intern. */
- html,body{overflow:hidden;overscroll-behavior:none;}
- body{position:fixed;top:0;left:0;width:100%;height:100dvh;}
- /* Grafik bis ganz nach unten hinter die (schwebende) Browser-Leiste ziehen, statt dort eine
-    weiße Fläche zu lassen. lvh = volle Fensterhöhe inkl. Bereich hinter der Leiste. */
- @supports (height:100lvh){body{height:100lvh;}}
+ /* Handy: die Seite selbst scrollt (kein fest verankerter Body mit innerem Scrollbereich).
+    Nur so legt Safari (iOS 26) seine schwebende Leiste direkt über die Grafik, statt darunter
+    eine eigene Fläche zu zeichnen. Kopfleiste bleibt per sticky oben stehen. */
+ html{background:#fff;}
+ body{height:auto;min-height:100vh;min-height:100lvh;overflow:visible;overflow-x:clip;}
+ .topbar{position:sticky;top:0;}
  .topbar{flex-wrap:nowrap;height:52px;min-height:0;padding:6px 12px;column-gap:10px;}
  .topbar .title,.topbar-tabs{display:none;}
  .mnav-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:none;background:transparent;border-radius:10px;cursor:pointer;color:var(--web-black);padding:0;margin-left:-6px;flex:0 0 auto;}
@@ -248,7 +247,7 @@ body.ready #boot{opacity:0;visibility:hidden;}
  .mnav-sw{position:relative;display:block;text-align:left;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:400;font-stretch:100%;color:var(--web-black);cursor:pointer;line-height:1;padding:0;transform:translateY(var(--capn,0));}
  .mnav-sw.active.cur::before{content:'';position:absolute;left:-12px;top:50%;transform:translate(-50%,-50%) translateY(calc(-1 * var(--capn,0px) - 0.4px));width:3px;height:24px;background:var(--akzentviolett);box-shadow:0 0 0 0.75px #fff;}
  .lbl-d{display:none;} .lbl-m{display:inline;}
- .stage-area{flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding:12px 8px 48px;padding-bottom:calc(48px + 100lvh - 100dvh + env(safe-area-inset-bottom,0px));gap:12px;-webkit-overflow-scrolling:touch;}
+ .stage-area{flex:1 0 auto;flex-direction:column;align-items:center;justify-content:flex-start;overflow:visible;padding:12px 8px 48px;padding-bottom:calc(48px + env(safe-area-inset-bottom,0px));gap:12px;}
  .stage-area .scaler{flex:0 0 auto;}
  .themenav{display:none;}
  .cal{width:min(340px,92vw);}
@@ -688,6 +687,10 @@ singleLine($('u-name'),fitUname);
 
 /* Skalierung */
 const isMobile=()=>matchMedia('(max-width:640px)').matches;
+/* volle Fensterhöhe (inkl. Bereich hinter schwebenden Browser-Leisten) */
+let _lvh=null;
+function fullWinH(){if(!_lvh){_lvh=document.createElement('div');_lvh.style.cssText='position:absolute;top:0;left:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none;';document.body.appendChild(_lvh);}
+ return _lvh.getBoundingClientRect().height||innerHeight;}
 function rescale(){const area=document.querySelector('.stage-area');const cfg=DOCS[curDoc];const sc=$(cfg.scaler);const st=activeStage();const nav=$('themeseg');
  if(isMobile()){
   // Handy: Dokument füllt die Breite; inneren Stage skalieren, Scaler = skalierte Größe (Scrollhöhe stimmt)
@@ -696,9 +699,9 @@ function rescale(){const area=document.querySelector('.stage-area');const cfg=DO
   st.style.transformOrigin='top left';st.style.transform='scale('+s+')';
   nav.style.left='';nav.style.top='';
   // Grafik mittig zur gesamten Fensterhöhe (inkl. Kopfleiste); passt sie nicht, oben unter der Kopfleiste
-  const winH=document.body.getBoundingClientRect().height||innerHeight,ar=area.getBoundingClientRect(),gh=cfg.h*s;
+  const winH=fullWinH(),gh=cfg.h*s;
   const padTop=parseFloat(getComputedStyle(area).paddingTop)||0;
-  sc.style.marginTop=Math.max(0,Math.round((winH-gh)/2-ar.top-padTop))+'px';
+  sc.style.marginTop=Math.max(0,Math.round((winH-gh)/2-area.offsetTop-padTop))+'px';
  } else {
   const m=16;const s=Math.min((area.clientHeight-m)/cfg.h,(area.clientWidth-m)/cfg.w);
   sc.style.width='';sc.style.height='';sc.style.overflow='';st.style.transform='';st.style.transformOrigin='';sc.style.marginTop='';
