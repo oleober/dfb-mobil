@@ -687,6 +687,20 @@ singleLine($('u-name'),fitUname);
 
 /* Skalierung */
 const isMobile=()=>matchMedia('(max-width:640px)').matches;
+/* Handy: Nach dem Schließen der Tastatur zur Scrollposition von vor der Eingabe zurückkehren.
+   (iOS schiebt die Seite fürs Eingabefeld nach oben und lässt sie danach dort stehen.) */
+(function(){
+ const isEd=el=>!!el&&(el.isContentEditable||el.tagName==='INPUT'||el.tagName==='TEXTAREA');
+ let saved=null,t=null;
+ document.addEventListener('focusin',e=>{if(!isMobile()||!isEd(e.target))return;clearTimeout(t);if(saved===null)saved=window.scrollY;});
+ document.addEventListener('focusout',()=>{if(!isMobile()||saved===null)return;clearTimeout(t);
+  t=setTimeout(()=>{if(isEd(document.activeElement))return; // nur Feldwechsel -> Tastatur bleibt offen
+   const y=saved;saved=null;
+   window.scrollTo({top:y,behavior:'smooth'});
+   // iOS korrigiert nach dem Einfahren der Tastatur teils noch nach -> einmal nachziehen
+   setTimeout(()=>{if(saved===null&&Math.abs(window.scrollY-y)>2)window.scrollTo({top:y,behavior:'smooth'});},450);
+  },150);});
+})();
 /* volle Fensterhöhe (inkl. Bereich hinter schwebenden Browser-Leisten) */
 let _lvh=null;
 function fullWinH(){if(!_lvh){_lvh=document.createElement('div');_lvh.style.cssText='position:absolute;top:0;left:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none;';document.body.appendChild(_lvh);}
