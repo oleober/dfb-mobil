@@ -491,12 +491,13 @@ function fmtDate(iso){if(!iso)return '';const d=new Date(iso+'T00:00:00');const 
    eine davor stehende Zusatzzeile wird gemerkt und beim Zurückwechseln wieder oben eingesetzt. */
 let adrZusatz='';
 function setFormat(f){const cur=stage.dataset.format||'story';if(cur===f)return;
+ const followDefault=(photoIdx===defaultPhoto(cur)-1);
  const el=[$('v-adr1'),$('v-adr2'),$('v-adr3')];const tx=el.map(e=>(e.textContent||'').replace(/\s+/g,' ').trim());
  let nl;
  if(f==='feed'){const ne=tx.filter(Boolean);const last=ne.slice(-2);adrZusatz=ne.length>2?ne.slice(0,-2).join(' '):'';nl=[last[0]||'',last[1]||'',''];}
  else{nl=adrZusatz?[adrZusatz,tx[0],tx[1]]:[tx[0],tx[1],''];}
  el.forEach((e,i)=>{e.textContent=nl[i];});
- stage.dataset.format=f;fitAll();rescale();}
+ stage.dataset.format=f;if(followDefault)applyDefaultPhoto();fitAll();rescale();}
 function applySwitch(v){
  if(isGraf(curDoc)){const ch=stage.dataset.theme!==v;stage.dataset.theme=v;if(ch)applyDefaultPhoto();fitAll();}
  else if(curDoc==='urkunde'){setUrkVariant(v);}
@@ -507,8 +508,8 @@ $('themeseg').addEventListener('click',e=>{const b=e.target.closest('.tnav');if(
 function setPhoto(i){photoIdx=(i+PHOTOS.length)%PHOTOS.length;$('photo').src=PHOTOS[photoIdx];stage.dataset.photo=photoIdx;drawDots();}
 /* Vorausgewähltes Foto beim Wechsel von Hell/Dunkel oder Thema (Story und Feed gleich).
    Nummern = Bild 1..6 in der Reihenfolge des Bildwechslers. */
-function defaultPhoto(){const dark=stage.dataset.theme==='dark',m=$('modultext').textContent;
- if(m==='Schule des Kleinfeldfußballs'||/^Hallentraining/.test(m))return 5;
+function defaultPhoto(fmt){const dark=stage.dataset.theme==='dark',m=$('modultext').textContent,feed=(fmt||stage.dataset.format)==='feed';
+ if(/^Hallentraining/.test(m)||m==='Schule des Kleinfeldfußballs')return feed?6:5;
  if(m==='Walking Football')return dark?2:4;
  return dark?2:1;}
 function applyDefaultPhoto(){setPhoto(defaultPhoto()-1);}
