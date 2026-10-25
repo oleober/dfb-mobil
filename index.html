@@ -508,7 +508,7 @@ function setPhoto(i){photoIdx=(i+PHOTOS.length)%PHOTOS.length;$('photo').src=PHO
 /* Vorausgewähltes Foto beim Wechsel von Hell/Dunkel oder Thema (Story und Feed gleich).
    Nummern = Bild 1..6 in der Reihenfolge des Bildwechslers. */
 function defaultPhoto(){const dark=stage.dataset.theme==='dark',m=$('modultext').textContent;
- if(m==='Schule des Kleinfeldfußballs')return 5;
+ if(m==='Schule des Kleinfeldfußballs'||/^Hallentraining/.test(m))return 5;
  if(m==='Walking Football')return dark?2:4;
  return dark?2:1;}
 function applyDefaultPhoto(){setPhoto(defaultPhoto()-1);}
