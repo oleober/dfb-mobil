@@ -547,10 +547,10 @@ window.addEventListener('scroll',closeMenu,true);
 
 /* Pill + Modul */
 $('pill').addEventListener('click',()=>showMenu($('pill'),TOPLINE,$('pillspan').textContent,v=>{$('pillspan').textContent=v;},'Besuch'));
-/* Pill je nach gewähltem Modul: Trainingsphilosophie-Module -> "Trainerfortbildung",
+/* Pill je nach gewähltem Modul: Trainingsphilosophie-Module und Hallentrainings -> "Trainerfortbildung",
    Walking Football / Schule des Kleinfeldfußballs -> "Fortbildung",
    Schnuppertraining -> Pill unverändert lassen. */
-function syncPillToModul(v){if(/Trainingsphilosophie/.test(v)){$('pillspan').textContent=TOPLINE[0];}else if(v==='Walking Football'||v==='Schule des Kleinfeldfußballs'){$('pillspan').textContent=TOPLINE[1];}}
+function syncPillToModul(v){if(/Trainingsphilosophie/.test(v)||/^Hallentraining/.test(v)){$('pillspan').textContent=TOPLINE[0];}else if(v==='Walking Football'||v==='Schule des Kleinfeldfußballs'){$('pillspan').textContent=TOPLINE[1];}}
 $('v-modul').addEventListener('click',()=>showMenu($('v-modul'),MODULE,$('modultext').textContent,v=>{const ch=$('modultext').textContent!==v;$('modultext').textContent=v;fitModul();syncPillToModul(v);if(ch)applyDefaultPhoto();},'Thema'));
 
 /* Datum: eigener Kalender, positioniert links oben vom Datum */
